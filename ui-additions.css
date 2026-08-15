@@ -20,6 +20,14 @@
   outline-offset: 3px;
 }
 
+.hero-status-rule {
+  color: #75552f;
+}
+
+.weekday-row {
+  color: var(--muted);
+}
+
 #cycle-progress {
   display: block;
   width: 100%;
