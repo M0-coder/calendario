@@ -1,3 +1,4 @@
+import "./moon-ui.js";
 import {
   MONTHS,
   formatGregorian,
@@ -121,16 +122,9 @@ function createMonthCard(month, auc, activeDate) {
 }
 
 function toRoman(value) {
-  const numerals = [
-    [10, "X"],
-    [9, "IX"],
-    [5, "V"],
-    [4, "IV"],
-    [1, "I"]
-  ];
+  const numerals = [[10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]];
   let remainder = value;
   let output = "";
-
   for (const [number, numeral] of numerals) {
     while (remainder >= number) {
       output += numeral;
@@ -142,41 +136,30 @@ function toRoman(value) {
 
 function renderMonths(auc) {
   calendarGrid.replaceChildren();
-  for (const month of MONTHS) {
-    calendarGrid.append(createMonthCard(month, auc, current));
-  }
+  for (const month of MONTHS) calendarGrid.append(createMonthCard(month, auc, current));
 }
 
 function renderYearDays(auc) {
   yearDaysContainer.replaceChildren();
   const count = reconstructedYearDayCount(auc);
-
   const intro = document.createElement("div");
   intro.className = "year-days-intro";
   intro.innerHTML = `
     <span class="kicker">FUERA DE LOS MESES · FUERA DE LA SEMANA</span>
     <strong>${count === 1 ? "1 Día del Año" : "2 Días del Año"}</strong>
-    <p>Estos días completan el ciclo solar sin desplazar el lunes de 1 Martius ni las 52 semanas regulares.</p>
-  `;
+    <p>Estos días completan el ciclo solar sin desplazar el lunes de 1 Martius ni las 52 semanas regulares.</p>`;
   yearDaysContainer.append(intro);
-
   const days = document.createElement("div");
   days.className = "year-days-list";
-
   for (let yearDay = 1; yearDay <= count; yearDay += 1) {
     const gregorian = reconstructedYearDayToGregorian({ auc, yearDay });
     const active = current.kind === "year-day" && current.auc === auc && current.yearDay === yearDay;
     const item = document.createElement("div");
     item.className = `year-day-item${active ? " is-today" : ""}`;
     if (active) item.setAttribute("aria-current", "date");
-    item.innerHTML = `
-      <span>DÍA DEL AÑO ${yearDay}</span>
-      <strong>${formatGregorian(gregorian)}</strong>
-      <small>sin día de semana</small>
-    `;
+    item.innerHTML = `<span>DÍA DEL AÑO ${yearDay}</span><strong>${formatGregorian(gregorian)}</strong><small>sin día de semana</small>`;
     days.append(item);
   }
-
   yearDaysContainer.append(days);
 }
 
@@ -189,16 +172,13 @@ function renderYear() {
 
 function renderConversion(parts) {
   const reconstructed = gregorianToReconstructed(parts);
-
   if (reconstructed.kind === "month-day") {
     const { weekOfYear, weekday } = reconstructedWeekInfo(reconstructed);
     conversionPrimary.textContent = `${reconstructed.day} ${reconstructed.monthName} · ${reconstructed.auc} AUC`;
-    conversionSecondary.textContent =
-      `Mes ${reconstructed.month}/13 · semana ${weekOfYear}/52 · día ${weekday}/7 · ciclo ${reconstructed.dayOfCycle}/${reconstructed.cycleLength}`;
+    conversionSecondary.textContent = `Mes ${reconstructed.month}/13 · semana ${weekOfYear}/52 · día ${weekday}/7 · ciclo ${reconstructed.dayOfCycle}/${reconstructed.cycleLength}`;
   } else {
     conversionPrimary.textContent = `Día del Año ${reconstructed.yearDay} · ${reconstructed.auc} AUC`;
-    conversionSecondary.textContent =
-      `Fuera de los 13 meses y de las 52 semanas · ciclo ${reconstructed.dayOfCycle}/${reconstructed.cycleLength}`;
+    conversionSecondary.textContent = `Fuera de los 13 meses y de las 52 semanas · ciclo ${reconstructed.dayOfCycle}/${reconstructed.cycleLength}`;
   }
 }
 
@@ -216,20 +196,16 @@ prevYearButton.addEventListener("click", () => {
   viewAuc -= 1;
   renderYear();
 });
-
 nextYearButton.addEventListener("click", () => {
   viewAuc += 1;
   renderYear();
 });
-
 currentYearButton.addEventListener("click", () => {
   viewAuc = current.auc;
   renderYear();
 });
-
 converterForm.addEventListener("submit", (event) => {
   event.preventDefault();
-
   try {
     const parts = parseISODate(gregorianInput.value);
     const reconstructed = gregorianToReconstructed(parts);
