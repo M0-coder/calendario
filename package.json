@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check src/calendar.js && node --check src/app.js && node --check tests/calendar.test.js && node --check tests/ui-contract.test.js",
+    "check": "node --check src/calendar.js && node --check src/app.js && node --check tests/calendar.test.js && node --check tests/calendar-coverage.test.js && node --check tests/ui-contract.test.js",
     "test": "node --test --experimental-test-coverage",
     "ci": "npm run check && npm test"
   },
