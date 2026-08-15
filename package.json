@@ -1,0 +1,14 @@
+{
+  "name": "calendario",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check src/calendar.js && node --check src/app.js && node --check tests/calendar.test.js",
+    "test": "node --test --experimental-test-coverage",
+    "ci": "npm run check && npm test"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
