@@ -13,16 +13,24 @@ export const MONTHS = Object.freeze([
   { number: 10, latin: "December", meaning: "décimo" },
   { number: 11, latin: "Ianuarius", meaning: "Jano" },
   { number: 12, latin: "Februarius", meaning: "purificación" },
-  { number: 13, latin: "Mercedonius", meaning: "intercalar / pago" }
+  { number: 13, latin: "Mercedonius", meaning: "intercalar / merces" }
 ]);
 
 export function isGregorianLeapYear(year) {
+  if (!Number.isInteger(year)) throw new RangeError("El año gregoriano debe ser entero");
   return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
 }
 
 function utcDate(year, month, day) {
-  const time = Date.UTC(year, month - 1, day);
-  const date = new Date(time);
+  if (![year, month, day].every(Number.isInteger)) {
+    throw new RangeError("La fecha gregoriana debe usar valores enteros");
+  }
+
+  // Date.UTC interpreta 0–99 como 1900–1999. setUTCFullYear evita esa
+  // excepción histórica de JavaScript y conserva correctamente esos años.
+  const date = new Date(0);
+  date.setUTCHours(0, 0, 0, 0);
+  date.setUTCFullYear(year, month - 1, day);
 
   if (
     date.getUTCFullYear() !== year ||
@@ -48,7 +56,10 @@ export function parseISODate(value) {
   if (!match) throw new RangeError("Usa el formato AAAA-MM-DD");
 
   const [, year, month, day] = match;
-  const date = utcDate(Number(year), Number(month), Number(day));
+  const numericYear = Number(year);
+  if (numericYear < 1) throw new RangeError("La interfaz gregoriana comienza en el año 0001");
+
+  const date = utcDate(numericYear, Number(month), Number(day));
   return toParts(date);
 }
 
@@ -57,11 +68,19 @@ export function reconstructedYearStartGregorianYear({ year, month }) {
 }
 
 export function aucFromGregorianYearStart(gregorianYearStart) {
-  return gregorianYearStart + 753;
+  if (!Number.isInteger(gregorianYearStart)) {
+    throw new RangeError("El año gregoriano de inicio debe ser entero");
+  }
+
+  const auc = gregorianYearStart + 753;
+  if (auc < 1) throw new RangeError("La fecha queda antes de 1 AUC");
+  return auc;
 }
 
 export function gregorianYearStartFromAuc(auc) {
-  if (!Number.isInteger(auc)) throw new RangeError("El año AUC debe ser entero");
+  if (!Number.isInteger(auc) || auc < 1) {
+    throw new RangeError("El año AUC debe ser un entero mayor o igual que 1");
+  }
   return auc - 753;
 }
 
@@ -121,23 +140,39 @@ export function reconstructedToGregorian({ auc, month, day }) {
   return toParts(result);
 }
 
+export function reconstructedYearDayCount(auc) {
+  const startYear = gregorianYearStartFromAuc(auc);
+  const start = utcDate(startYear, 3, 1);
+  const nextStart = utcDate(startYear + 1, 3, 1);
+  const cycleLength = Math.round((nextStart.getTime() - start.getTime()) / DAY_MS);
+  return cycleLength - 364;
+}
+
 export function reconstructedYearDayToGregorian({ auc, yearDay = 1 }) {
   if (!Number.isInteger(yearDay) || yearDay < 1 || yearDay > 2) {
     throw new RangeError("El Día del Año debe ser 1 o 2");
   }
 
-  const startYear = gregorianYearStartFromAuc(auc);
-  const start = utcDate(startYear, 3, 1);
-  const nextStart = utcDate(startYear + 1, 3, 1);
-  const cycleLength = Math.round((nextStart.getTime() - start.getTime()) / DAY_MS);
-  const availableYearDays = cycleLength - 364;
-
+  const availableYearDays = reconstructedYearDayCount(auc);
   if (yearDay > availableYearDays) {
     throw new RangeError("Ese ciclo no contiene un segundo Día del Año");
   }
 
+  const startYear = gregorianYearStartFromAuc(auc);
+  const start = utcDate(startYear, 3, 1);
   const result = new Date(start.getTime() + (363 + yearDay) * DAY_MS);
   return toParts(result);
+}
+
+export function reconstructedWeekInfo(reconstructed) {
+  if (!reconstructed || reconstructed.kind !== "month-day") {
+    throw new RangeError("Los Días del Año están fuera de la semana reconstruida");
+  }
+
+  return {
+    weekOfYear: Math.ceil(reconstructed.dayOfCycle / 7),
+    weekday: ((reconstructed.dayOfCycle - 1) % 7) + 1
+  };
 }
 
 export function formatGregorian({ year, month, day }, locale = "es-PE") {
@@ -146,6 +181,15 @@ export function formatGregorian({ year, month, day }, locale = "es-PE") {
     day: "numeric",
     month: "long",
     year: "numeric"
+  }).format(utcDate(year, month, day));
+}
+
+export function formatGregorianShort({ year, month, day }, includeYear = false, locale = "es-PE") {
+  return new Intl.DateTimeFormat(locale, {
+    timeZone: "UTC",
+    day: "numeric",
+    month: "short",
+    ...(includeYear ? { year: "numeric" } : {})
   }).format(utcDate(year, month, day));
 }
 
