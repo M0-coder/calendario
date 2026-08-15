@@ -61,7 +61,7 @@ function ensureMoonCard() {
       <div><span>Edad lunar</span><strong id="moon-age">—</strong></div>
       <div><span>Próxima principal</span><strong id="moon-next">—</strong></div>
     </div>
-    <p class="moon-note">Capa astronómica independiente del ciclo XIII × XXVIII. Rango validado ${LUNAR_SUPPORTED_YEARS.min}–${LUNAR_SUPPORTED_YEARS.max}.</p>`;
+    <p class="moon-note">Capa astronómica independiente del ciclo XIII × XXVIII. Rango operativo ${LUNAR_SUPPORTED_YEARS.min}–${LUNAR_SUPPORTED_YEARS.max}; regresiones contrastadas con USNO.</p>`;
   ensureHeroSide().append(card);
   return card;
 }
@@ -71,7 +71,7 @@ function renderMoonToday() {
   const now = new Date();
   const state = moonStateAt(now);
   if (!state.supported) {
-    document.querySelector("#moon-card-title").textContent = "Fuera del rango validado";
+    document.querySelector("#moon-card-title").textContent = "Fuera del rango operativo";
     for (const id of ["moon-illumination", "moon-trend", "moon-age", "moon-next"]) {
       document.querySelector(`#${id}`).textContent = "—";
     }
@@ -101,7 +101,7 @@ function renderConversionMoon() {
     const parts = parseISODate(document.querySelector("#gregorian-input").value);
     const state = moonStateForGregorian(parts);
     if (!state.supported) {
-      line.textContent = `Luna: disponible entre ${LUNAR_SUPPORTED_YEARS.min} y ${LUNAR_SUPPORTED_YEARS.max}`;
+      line.textContent = `Luna: rango operativo ${LUNAR_SUPPORTED_YEARS.min}–${LUNAR_SUPPORTED_YEARS.max}`;
       return;
     }
     line.textContent = `${state.symbol} ${state.phaseName} · ${state.illuminationPercent}% iluminada · ${state.trend} · edad ${formatAge(state.ageDaysApprox)}`;
