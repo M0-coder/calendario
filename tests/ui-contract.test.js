@@ -26,7 +26,7 @@ test("HTML contiene todos los puntos de montaje requeridos por app.js", async ()
     "today-position",
     "today-week",
     "cycle-progress-label",
-    "cycle-progress-fill",
+    "cycle-progress",
     "today-day",
     "today-month"
   ];
@@ -43,6 +43,16 @@ test("producción no contiene etiquetas de Preview y carga ambos CSS", async () 
   assert.match(html, /href=["']\.\/styles\.css["']/);
   assert.match(html, /href=["']\.\/ui-additions\.css["']/);
   assert.match(html, /Motor determinista · Producción/);
+});
+
+test("el progreso usa elemento nativo y no depende de estilos inline bajo CSP", async () => {
+  const html = await read("index.html");
+  const app = await read("src/app.js");
+
+  assert.match(html, /<progress\s+id=["']cycle-progress["']/);
+  assert.doesNotMatch(html, /cycle-progress-fill/);
+  assert.doesNotMatch(app, /\.style\./);
+  assert.match(app, /cycleProgress\.value\s*=\s*reconstructed\.dayOfCycle/);
 });
 
 test("la entrada gregoriana y el parser comparten el rango 0001–9999", async () => {
