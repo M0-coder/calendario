@@ -22,8 +22,14 @@ La aplicación está en producción y `main` es la rama desplegable. Los cambios
 - El año se expresa como AUC mediante la equivalencia aritmética definida en el motor.
 - `Mercedonius` es reutilizado como mes XIII fijo por decisión de esta reconstrucción; no se presenta como calendario romano histórico literal.
 
+## Capa lunar
+
+La Luna se calcula como una capa astronómica separada: no modifica la aritmética XIII × XXVIII. `src/moon.js` expone las ocho fases, tendencia creciente/menguante, iluminación, edad lunar aproximada y las fases principales que se marcan en la vista anual.
+
+La capa lunar trabaja en un rango operativo 1700–2100 y tiene regresiones contrastadas con fases principales oficiales de U.S. Naval Observatory. El método, sus límites y las anclas de prueba están documentados en `docs/LUNAR.md`.
+
 ## Ingeniería
 
-El núcleo de dominio vive en `src/calendar.js` y no depende del DOM. `src/app.js` consume ese contrato para la interfaz.
+El núcleo del calendario vive en `src/calendar.js`; la astronomía lunar vive en `src/moon.js`. Ninguno depende del DOM. `src/app.js` y `src/moon-ui.js` consumen esos contratos para la interfaz.
 
 CI ejecuta comprobación sintáctica, pruebas unitarias y cobertura. La deuda pendiente y los gates de estabilidad están documentados en `docs/ENGINEERING.md`.
