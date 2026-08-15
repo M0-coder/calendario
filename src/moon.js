@@ -130,7 +130,7 @@ export function moonStateAt(date) {
     return {
       supported: false,
       range: LUNAR_SUPPORTED_YEARS,
-      message: `Capa lunar validada entre ${LUNAR_SUPPORTED_YEARS.min} y ${LUNAR_SUPPORTED_YEARS.max}`
+      message: `Capa lunar disponible en su rango operativo ${LUNAR_SUPPORTED_YEARS.min}–${LUNAR_SUPPORTED_YEARS.max}`
     };
   }
 
