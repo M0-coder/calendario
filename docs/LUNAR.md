@@ -13,7 +13,7 @@ La Luna es una capa astronómica independiente del calendario reconstruido.
 Para una fecha compatible, la capa lunar devuelve:
 
 - una de 8 fases: Luna nueva, Creciente, Cuarto creciente, Gibosa creciente, Luna llena, Gibosa menguante, Cuarto menguante y Menguante;
-- tendencia: creciente, menguante o transición en las fases nueva/llena;
+- tendencia: creciente, menguante o transición cerca de luna nueva/luna llena;
 - fracción y porcentaje iluminado;
 - edad lunar aproximada, expresada sobre un mes sinódico medio de 29.530588853 días;
 - próxima fase principal aproximada;
@@ -31,11 +31,11 @@ El motor usa un modelo geocéntrico compacto de posiciones solares y lunares de 
 
 No se presenta como una efeméride profesional. La próxima fase principal y la edad lunar se etiquetan como aproximadas.
 
-## Rango validado
+## Rango operativo y evidencia
 
-La interfaz lunar declara soporte entre **1700 y 2100**. Fuera de ese intervalo el calendario sigue funcionando, pero la capa lunar no inventa valores.
+La interfaz lunar limita su **rango operativo a 1700–2100**. Fuera de ese intervalo el calendario XIII × XXVIII sigue funcionando, pero la capa lunar no devuelve valores astronómicos.
 
-La ventana coincide con el rango del servicio de fases lunares de U.S. Naval Observatory usado como referencia de regresión.
+Ese intervalo coincide con el rango publicado por el servicio de fases lunares de U.S. Naval Observatory. Esto no significa que cada fecha de los cuatro siglos haya sido validada individualmente. La regresión automatizada actual está contrastada con fases principales oficiales de USNO alrededor de agosto y septiembre de 2026.
 
 ## Anclas de regresión
 
@@ -52,4 +52,5 @@ El modelo debe clasificar correctamente esas fases y permanecer cerca de sus fra
 
 - U.S. Naval Observatory — Phases of the Moon and Percent of the Moon Illuminated: https://aa.usno.navy.mil/faq/moon_phases
 - U.S. Naval Observatory — Dates of Primary Phases of the Moon: https://aa.usno.navy.mil/data/MoonPhases
+- U.S. Naval Observatory — API Documentation: https://aa.usno.navy.mil/data/api.html
 - NASA Science — synodic month / lunar month: https://science.nasa.gov/eclipses/glossary/
