@@ -8,6 +8,30 @@ async function read(path) {
   return readFile(new URL(path, root), "utf8");
 }
 
+function luminance(hex) {
+  const channels = hex
+    .slice(1)
+    .match(/.{2}/g)
+    .map((value) => Number.parseInt(value, 16) / 255)
+    .map((value) => (value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4));
+
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+}
+
+function contrastRatio(foreground, background) {
+  const a = luminance(foreground);
+  const b = luminance(background);
+  const lighter = Math.max(a, b);
+  const darker = Math.min(a, b);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function cssVariable(css, name) {
+  const match = new RegExp(`--${name}:\\s*(#[0-9a-fA-F]{6})`).exec(css);
+  assert.ok(match, `No se encontró --${name}`);
+  return match[1];
+}
+
 test("HTML contiene todos los puntos de montaje requeridos por app.js", async () => {
   const html = await read("index.html");
   const requiredIds = [
@@ -54,6 +78,18 @@ test("el progreso usa elemento nativo y no depende de estilos inline bajo CSP", 
   assert.doesNotMatch(html, /cycle-progress-fill/);
   assert.doesNotMatch(app, /\.style\./);
   assert.match(app, /cycleProgress\.value\s*=\s*reconstructed\.dayOfCycle/);
+});
+
+test("texto pequeño clave mantiene contraste WCAG AA", async () => {
+  const styles = await read("styles.css");
+  const additions = await read("ui-additions.css");
+  const paper = cssVariable(styles, "paper");
+  const muted = cssVariable(styles, "muted");
+  const heroRule = /\.hero-status-rule\s*\{[^}]*color:\s*(#[0-9a-fA-F]{6})/s.exec(additions);
+
+  assert.ok(heroRule, "Falta el color auditado de .hero-status-rule");
+  assert.ok(contrastRatio(muted, paper) >= 4.5, "--muted no alcanza 4.5:1 sobre --paper");
+  assert.ok(contrastRatio(heroRule[1], paper) >= 4.5, ".hero-status-rule no alcanza 4.5:1");
 });
 
 test("la entrada gregoriana y el parser comparten el rango 0001–9999", async () => {
