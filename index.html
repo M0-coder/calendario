@@ -11,8 +11,10 @@
     <meta name="color-scheme" content="light" />
     <title>Calendario · XIII × XXVIII</title>
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./ui-additions.css" />
   </head>
   <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
     <div class="page-shell">
       <header class="site-header">
         <a class="brand" href="#top" aria-label="Calendario, inicio">
@@ -30,7 +32,8 @@
         </nav>
       </header>
 
-      <main id="top">
+      <main id="contenido">
+        <div id="top"></div>
         <section class="hero" id="hoy" aria-labelledby="hero-title">
           <div class="hero-status">
             <span>RECONSTRUCCIÓN CONTEMPORÁNEA</span>
@@ -60,24 +63,22 @@
                 <strong id="today-position">—</strong>
               </div>
               <div class="ledger-row">
-                <span>Semana</span>
+                <span>Semana anual</span>
                 <strong id="today-week">—</strong>
               </div>
               <div class="ledger-row">
                 <span>Año nuevo</span>
-                <strong>1 Martius</strong>
+                <strong>1 Martius · Lunes</strong>
               </div>
             </aside>
           </div>
 
-          <div class="cycle-progress" aria-label="Progreso del año reconstruido">
+          <div class="cycle-progress">
             <div class="cycle-progress-copy">
               <span id="cycle-progress-label">—</span>
-              <span>364 días regulares + día(s) del año</span>
+              <span>364 días regulares + 1–2 Días del Año</span>
             </div>
-            <div class="cycle-track" aria-hidden="true">
-              <span id="cycle-progress-fill"></span>
-            </div>
+            <progress id="cycle-progress" value="0" max="365" aria-label="Progreso del año reconstruido"></progress>
           </div>
         </section>
 
@@ -98,18 +99,19 @@
           <div class="section-heading year-heading">
             <div>
               <p class="kicker">I · AÑO</p>
-              <h2 id="months-title">Trece meses. Cuatro semanas cada uno.</h2>
+              <h2 id="months-title">Trece meses. Cincuenta y dos semanas exactas.</h2>
             </div>
             <div class="year-toolbar" aria-label="Navegar años AUC">
               <button id="prev-year" type="button" class="year-button" aria-label="Año AUC anterior">←</button>
               <button id="current-year" type="button" class="year-current">
-                <span id="view-year">— AUC</span>
-                <small>volver a hoy</small>
+                <span id="view-year" aria-live="polite">— AUC</span>
+                <small>volver al año actual</small>
               </button>
               <button id="next-year" type="button" class="year-button" aria-label="Año AUC siguiente">→</button>
             </div>
           </div>
-          <div class="calendar-grid" id="calendar-grid" aria-live="polite"></div>
+          <div class="calendar-grid" id="calendar-grid"></div>
+          <div class="year-days" id="year-days"></div>
         </section>
 
         <section class="section converter-section" id="convertir" aria-labelledby="converter-title">
@@ -119,8 +121,8 @@
               <h2 id="converter-title">Una fecha, dos sistemas.</h2>
             </div>
             <p class="section-copy">
-              Introduce cualquier fecha gregoriana. El motor calcula su posición exacta en el ciclo
-              reconstruido y expresa el año como AUC.
+              Introduce una fecha gregoriana entre los años 0001 y 9999. El motor calcula su posición
+              exacta en el ciclo reconstruido y expresa el año como AUC.
             </p>
           </div>
 
@@ -128,7 +130,14 @@
             <form id="converter-form">
               <label for="gregorian-input">Fecha gregoriana</label>
               <div class="converter-controls">
-                <input id="gregorian-input" name="date" type="date" required />
+                <input
+                  id="gregorian-input"
+                  name="date"
+                  type="date"
+                  min="0001-01-01"
+                  max="9999-12-31"
+                  required
+                />
                 <button type="submit">Convertir</button>
               </div>
             </form>
@@ -160,8 +169,8 @@
             </article>
             <article>
               <span class="article-index">02</span>
-              <h3>13 × 28</h3>
-              <p>Es nuestra regla estructural: 364 días regulares distribuidos en 52 semanas exactas.</p>
+              <h3>Semana fija</h3>
+              <p>Cada mes contiene cuatro semanas de lunes a domingo. Los Días del Año quedan fuera de la semana, por lo que 1 Martius vuelve a ser lunes cada ciclo.</p>
             </article>
             <article>
               <span class="article-index">03</span>
@@ -179,7 +188,7 @@
 
       <footer>
         <span>CALENDARIO / XIII × XXVIII</span>
-        <span>Motor determinista · Producción</span>
+        <span>Reconstrucción contemporánea · AUC</span>
       </footer>
     </div>
 
