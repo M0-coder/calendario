@@ -117,6 +117,13 @@ function supportForDate(date) {
   return year >= LUNAR_SUPPORTED_YEARS.min && year <= LUNAR_SUPPORTED_YEARS.max;
 }
 
+function trendForPhase(phase) {
+  const atNewMoon = circularDistance(phase, 0) < 0.015;
+  const atFullMoon = circularDistance(phase, 0.5) < 0.015;
+  if (atNewMoon || atFullMoon) return "transición";
+  return phase < 0.5 ? "creciente" : "menguante";
+}
+
 export function moonStateAt(date) {
   if (!(date instanceof Date) || Number.isNaN(date.getTime())) throw new RangeError("Fecha lunar inválida");
   if (!supportForDate(date)) {
@@ -129,10 +136,6 @@ export function moonStateAt(date) {
 
   const { illumination, phase } = lunarGeometry(date);
   const phaseData = phaseForFraction(phase);
-  const trend = phaseData.index === 0 || phaseData.index === 4
-    ? "transición"
-    : phase < 0.5 ? "creciente" : "menguante";
-
   return {
     supported: true,
     phase,
@@ -140,7 +143,7 @@ export function moonStateAt(date) {
     phaseName: phaseData.name,
     symbol: phaseData.symbol,
     primary: phaseData.primary,
-    trend,
+    trend: trendForPhase(phase),
     illumination,
     illuminationPercent: Math.round(illumination * 100),
     ageDaysApprox: phase * SYNODIC_MONTH_DAYS
