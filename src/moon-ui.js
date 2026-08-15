@@ -12,6 +12,15 @@ import {
   primaryMoonPhaseForGregorianDay
 } from "./moon.js";
 
+function ensureMoonStyles() {
+  if (document.querySelector('link[data-lunar-styles="true"]')) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "./moon.css";
+  link.dataset.lunarStyles = "true";
+  document.head.append(link);
+}
+
 function formatAge(days) {
   return `${days.toFixed(1).replace(".", ",")} días aprox.`;
 }
@@ -25,7 +34,6 @@ function formatNext(next) {
 function ensureMoonCard() {
   let card = document.querySelector("#moon-card");
   if (card) return card;
-
   card = document.createElement("section");
   card.id = "moon-card";
   card.className = "moon-card";
@@ -33,10 +41,7 @@ function ensureMoonCard() {
   card.innerHTML = `
     <div class="moon-card-head">
       <span class="moon-disc" id="moon-symbol" aria-hidden="true">🌑</span>
-      <div>
-        <span class="kicker">LUNA · ESTADO ASTRONÓMICO</span>
-        <strong id="moon-card-title">—</strong>
-      </div>
+      <div><span class="kicker">LUNA · ESTADO ASTRONÓMICO</span><strong id="moon-card-title">—</strong></div>
     </div>
     <div class="moon-metrics">
       <div><span>Iluminación</span><strong id="moon-illumination">—</strong></div>
@@ -44,8 +49,7 @@ function ensureMoonCard() {
       <div><span>Edad lunar</span><strong id="moon-age">—</strong></div>
       <div><span>Próxima principal</span><strong id="moon-next">—</strong></div>
     </div>
-    <p class="moon-note">Capa astronómica independiente del ciclo XIII × XXVIII. Rango validado ${LUNAR_SUPPORTED_YEARS.min}–${LUNAR_SUPPORTED_YEARS.max}.</p>
-  `;
+    <p class="moon-note">Capa astronómica independiente del ciclo XIII × XXVIII. Rango validado ${LUNAR_SUPPORTED_YEARS.min}–${LUNAR_SUPPORTED_YEARS.max}.</p>`;
   document.querySelector(".hero-ledger")?.after(card);
   return card;
 }
@@ -54,16 +58,11 @@ function renderMoonToday() {
   ensureMoonCard();
   const now = new Date();
   const state = moonStateAt(now);
-
   if (!state.supported) {
     document.querySelector("#moon-card-title").textContent = "Fuera del rango validado";
-    document.querySelector("#moon-illumination").textContent = "—";
-    document.querySelector("#moon-trend").textContent = "—";
-    document.querySelector("#moon-age").textContent = "—";
-    document.querySelector("#moon-next").textContent = "—";
+    for (const id of ["moon-illumination", "moon-trend", "moon-age", "moon-next"]) document.querySelector(`#${id}`).textContent = "—";
     return;
   }
-
   document.querySelector("#moon-symbol").textContent = state.symbol;
   document.querySelector("#moon-card-title").textContent = state.phaseName;
   document.querySelector("#moon-illumination").textContent = `${state.illuminationPercent}%`;
@@ -111,7 +110,6 @@ function setMarker(dayElement, phase) {
 function renderCalendarMoonMarkers() {
   const auc = Number.parseInt(document.querySelector("#view-year")?.textContent || "", 10);
   if (!Number.isInteger(auc)) return;
-
   const cards = [...document.querySelectorAll("#calendar-grid .month-card")];
   cards.forEach((card, monthIndex) => {
     [...card.querySelectorAll(".calendar-day")].forEach((dayElement, dayIndex) => {
@@ -119,7 +117,6 @@ function renderCalendarMoonMarkers() {
       setMarker(dayElement, primaryMoonPhaseForGregorianDay(gregorian));
     });
   });
-
   const yearDayCount = reconstructedYearDayCount(auc);
   const items = [...document.querySelectorAll("#year-days .year-day-item")];
   for (let yearDay = 1; yearDay <= Math.min(yearDayCount, items.length); yearDay += 1) {
@@ -129,15 +126,14 @@ function renderCalendarMoonMarkers() {
 }
 
 function bootLunarLayer() {
+  ensureMoonStyles();
   renderMoonToday();
   ensureConversionMoon();
   queueMicrotask(() => {
     renderConversionMoon();
     renderCalendarMoonMarkers();
   });
-
   document.querySelector("#converter-form")?.addEventListener("submit", () => queueMicrotask(renderConversionMoon));
-
   const yearLabel = document.querySelector("#view-year");
   if (yearLabel) {
     new MutationObserver(() => queueMicrotask(renderCalendarMoonMarkers)).observe(yearLabel, {
