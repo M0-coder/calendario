@@ -31,6 +31,7 @@ const prevYearButton = document.querySelector("#prev-year");
 const nextYearButton = document.querySelector("#next-year");
 const currentYearButton = document.querySelector("#current-year");
 const viewYearLabel = document.querySelector("#view-year");
+const cycleProgress = document.querySelector("#cycle-progress");
 
 let current;
 let viewAuc;
@@ -67,8 +68,8 @@ function renderToday() {
   document.querySelector("#today-week").textContent = formatWeek(reconstructed);
   document.querySelector("#cycle-progress-label").textContent =
     `Día ${reconstructed.dayOfCycle} de ${reconstructed.cycleLength}`;
-  document.querySelector("#cycle-progress-fill").style.width =
-    `${(reconstructed.dayOfCycle / reconstructed.cycleLength) * 100}%`;
+  cycleProgress.max = reconstructed.cycleLength;
+  cycleProgress.value = reconstructed.dayOfCycle;
 
   if (reconstructed.kind === "month-day") {
     document.querySelector("#today-day").textContent = reconstructed.day;
