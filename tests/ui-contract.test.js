@@ -36,13 +36,14 @@ test("HTML contiene todos los puntos de montaje requeridos por app.js", async ()
   }
 });
 
-test("producción no contiene etiquetas de Preview y carga ambos CSS", async () => {
+test("el HTML compartido no se etiqueta como Preview ni Producción", async () => {
   const html = await read("index.html");
 
   assert.doesNotMatch(html, /PR #\d+\s*·\s*Preview/i);
+  assert.doesNotMatch(html, />\s*(Preview|Producción)\s*</i);
   assert.match(html, /href=["']\.\/styles\.css["']/);
   assert.match(html, /href=["']\.\/ui-additions\.css["']/);
-  assert.match(html, /Motor determinista · Producción/);
+  assert.match(html, /Reconstrucción contemporánea · AUC/);
 });
 
 test("el progreso usa elemento nativo y no depende de estilos inline bajo CSP", async () => {
