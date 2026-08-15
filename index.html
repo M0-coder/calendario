@@ -7,8 +7,9 @@
       name="description"
       content="Calendario reconstruido de 13 meses de 28 días inspirado en la nomenclatura romana."
     />
-    <meta name="color-scheme" content="dark" />
-    <title>Calendario · 13 × 28</title>
+    <meta name="theme-color" content="#eee9df" />
+    <meta name="color-scheme" content="light" />
+    <title>Calendario · XIII × XXVIII</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -16,11 +17,14 @@
       <header class="site-header">
         <a class="brand" href="#top" aria-label="Calendario, inicio">
           <span class="brand-mark" aria-hidden="true">XIII</span>
-          <span>CALENDARIO</span>
+          <span class="brand-copy">
+            <strong>CALENDARIO</strong>
+            <small>13 × 28</small>
+          </span>
         </a>
         <nav aria-label="Navegación principal">
           <a href="#hoy">Hoy</a>
-          <a href="#meses">13 meses</a>
+          <a href="#meses">Año</a>
           <a href="#convertir">Convertir</a>
           <a href="#metodo">Método</a>
         </nav>
@@ -28,44 +32,82 @@
 
       <main id="top">
         <section class="hero" id="hoy" aria-labelledby="hero-title">
-          <div class="eyebrow">RECONSTRUCCIÓN · NO CALENDARIO ROMANO HISTÓRICO</div>
+          <div class="hero-status">
+            <span>RECONSTRUCCIÓN CONTEMPORÁNEA</span>
+            <span class="hero-status-rule">NOMENCLATURA ROMANA · CICLO SOLAR</span>
+          </div>
+
           <div class="hero-grid">
-            <div>
-              <p class="kicker">Fecha reconstruida de hoy</p>
+            <div class="hero-date">
+              <p class="kicker">Hoy, en el sistema reconstruido</p>
               <h1 id="hero-title">
                 <span id="today-day">—</span>
                 <span id="today-month">—</span>
               </h1>
-              <p class="auc-line"><span id="today-auc">—</span> AUC</p>
+              <div class="auc-lockup">
+                <span id="today-auc">—</span>
+                <span>AUC</span>
+              </div>
             </div>
-            <div class="hero-meta">
-              <div>
-                <span class="meta-label">Equivalente gregoriano</span>
+
+            <aside class="hero-ledger" aria-label="Datos del ciclo actual">
+              <div class="ledger-row">
+                <span>Gregoriano</span>
                 <strong id="today-gregorian">—</strong>
               </div>
-              <div>
-                <span class="meta-label">Estructura</span>
-                <strong>13 meses × 28 días</strong>
+              <div class="ledger-row">
+                <span>Posición</span>
+                <strong id="today-position">—</strong>
               </div>
-              <div>
-                <span class="meta-label">Año nuevo</span>
+              <div class="ledger-row">
+                <span>Semana</span>
+                <strong id="today-week">—</strong>
+              </div>
+              <div class="ledger-row">
+                <span>Año nuevo</span>
                 <strong>1 Martius</strong>
               </div>
+            </aside>
+          </div>
+
+          <div class="cycle-progress" aria-label="Progreso del año reconstruido">
+            <div class="cycle-progress-copy">
+              <span id="cycle-progress-label">—</span>
+              <span>364 días regulares + día(s) del año</span>
+            </div>
+            <div class="cycle-track" aria-hidden="true">
+              <span id="cycle-progress-fill"></span>
             </div>
           </div>
-          <p class="hero-note" id="today-note"></p>
         </section>
 
-        <section class="section" id="meses" aria-labelledby="months-title">
-          <div class="section-heading">
+        <section class="fossil-band" aria-labelledby="fossil-title">
+          <div>
+            <p class="kicker">EL FÓSIL LINGÜÍSTICO</p>
+            <h2 id="fossil-title">Los nombres vuelven a coincidir con el número.</h2>
+          </div>
+          <div class="fossil-sequence" aria-label="Secuencia numérica de septiembre a diciembre">
+            <div><span>VII</span><strong>SEPTEMBER</strong></div>
+            <div><span>VIII</span><strong>OCTOBER</strong></div>
+            <div><span>IX</span><strong>NOVEMBER</strong></div>
+            <div><span>X</span><strong>DECEMBER</strong></div>
+          </div>
+        </section>
+
+        <section class="section year-section" id="meses" aria-labelledby="months-title">
+          <div class="section-heading year-heading">
             <div>
-              <p class="kicker">I · ESTRUCTURA</p>
-              <h2 id="months-title">Los trece meses</h2>
+              <p class="kicker">I · AÑO</p>
+              <h2 id="months-title">Trece meses. Cuatro semanas cada uno.</h2>
             </div>
-            <p class="section-copy">
-              Cada mes contiene cuatro semanas exactas. September vuelve a ser el
-              séptimo mes; October, el octavo; November, el noveno; December, el décimo.
-            </p>
+            <div class="year-toolbar" aria-label="Navegar años AUC">
+              <button id="prev-year" type="button" class="year-button" aria-label="Año AUC anterior">←</button>
+              <button id="current-year" type="button" class="year-current">
+                <span id="view-year">— AUC</span>
+                <small>volver a hoy</small>
+              </button>
+              <button id="next-year" type="button" class="year-button" aria-label="Año AUC siguiente">→</button>
+            </div>
           </div>
           <div class="calendar-grid" id="calendar-grid" aria-live="polite"></div>
         </section>
@@ -74,11 +116,11 @@
           <div class="section-heading">
             <div>
               <p class="kicker">II · CONVERSIÓN</p>
-              <h2 id="converter-title">De gregoriano a reconstruido</h2>
+              <h2 id="converter-title">Una fecha, dos sistemas.</h2>
             </div>
             <p class="section-copy">
-              El motor usa días UTC para evitar errores de zona horaria y fija el comienzo
-              del ciclo en el 1 de marzo gregoriano.
+              Introduce cualquier fecha gregoriana. El motor calcula su posición exacta en el ciclo
+              reconstruido y expresa el año como AUC.
             </p>
           </div>
 
@@ -91,7 +133,7 @@
               </div>
             </form>
             <div class="conversion-result" id="conversion-result" aria-live="polite">
-              <span class="result-label">Resultado</span>
+              <span class="result-label">Equivalencia</span>
               <strong id="conversion-primary">Selecciona una fecha</strong>
               <span id="conversion-secondary">—</span>
             </div>
@@ -102,50 +144,42 @@
           <div class="section-heading">
             <div>
               <p class="kicker">III · MÉTODO</p>
-              <h2 id="method-title">Qué es histórico y qué es reconstruido</h2>
+              <h2 id="method-title">Histórico donde hay evidencia. Reconstruido donde decidimos.</h2>
             </div>
+            <p class="section-copy">
+              El sitio no presenta un calendario romano perdido como hecho histórico. Separa la
+              nomenclatura documentada de la estructura moderna 13 × 28.
+            </p>
           </div>
 
           <div class="method-grid">
             <article>
               <span class="article-index">01</span>
-              <h3>Nomenclatura</h3>
-              <p>
-                Martius abre el año y preservamos Quintilis, Sextilis, September,
-                October, November y December en su secuencia numérica antigua.
-              </p>
+              <h3>Martius primero</h3>
+              <p>El orden conserva la secuencia antigua que hace de September el séptimo mes.</p>
             </article>
             <article>
               <span class="article-index">02</span>
-              <h3>Estructura</h3>
-              <p>
-                Los 13 meses de 28 días son una construcción moderna: 364 días regulares
-                más uno o dos Días del Año fuera de los meses para cerrar el ciclo solar.
-              </p>
+              <h3>13 × 28</h3>
+              <p>Es nuestra regla estructural: 364 días regulares distribuidos en 52 semanas exactas.</p>
             </article>
             <article>
               <span class="article-index">03</span>
               <h3>AUC</h3>
-              <p>
-                El número de año usa la convención Ab Urbe Condita con equivalencia
-                aritmética: año gregoriano de inicio + 753.
-              </p>
+              <p>El año se expresa con la convención Ab Urbe Condita usando la equivalencia aritmética definida.</p>
             </article>
             <article>
               <span class="article-index">04</span>
               <h3>Mercedonius</h3>
-              <p>
-                El nombre procede del mes intercalar romano. Aquí lo reutilizamos como
-                mes XIII fijo; esa función permanente no es histórica.
-              </p>
+              <p>Reutilizamos el nombre del mes intercalar romano como mes XIII fijo; esa función es deliberadamente moderna.</p>
             </article>
           </div>
         </section>
       </main>
 
       <footer>
-        <span>CALENDARIO / 13 × 28</span>
-        <span>Motor determinista · sin dependencias de runtime</span>
+        <span>CALENDARIO / XIII × XXVIII</span>
+        <span>Motor determinista · PR #1 · Preview</span>
       </footer>
     </div>
 
