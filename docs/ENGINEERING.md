@@ -29,6 +29,7 @@ Calendario es una web estática, sin backend y sin dependencias de runtime. El n
 6. La lógica de fechas usa UTC internamente para evitar deriva por zona horaria/DST.
 7. Los años gregorianos `0001–0099` deben conservar su valor literal y no sufrir la coerción histórica de `Date.UTC` a `1900–1999`.
 8. AUC debe ser un entero mayor o igual que 1.
+9. La UI no debe depender de estilos inline porque la CSP no autoriza `unsafe-inline`.
 
 ## Matriz de ingeniería
 
@@ -39,11 +40,11 @@ Calendario es una web estática, sin backend y sin dependencias de runtime. El n
 | Pruebas unitarias | invariantes, fronteras y regresiones | implementado |
 | Reversibilidad exhaustiva | todos los días regulares en ciclos representativos | implementado |
 | Pruebas instrumentadas | navegador real | pendiente |
-| Cobertura | reporte de `node --test --experimental-test-coverage` | implementado, umbral pendiente |
-| Análisis estático | sintaxis + revisión de API del dominio | parcial |
-| CI | GitHub Actions, permisos mínimos | implementado |
+| Cobertura del motor | líneas ≥95%, ramas ≥90%, funciones 100% | implementado y bloqueante |
+| Análisis estático | sintaxis + contratos HTML/config | parcial |
+| CI | GitHub Actions, permisos mínimos, runner fijado | implementado |
 | Seguridad | CSP + headers + cero secretos | implementado |
-| Reproducibilidad | Node 22, cero dependencias externas | implementado |
+| Reproducibilidad | Node 22, Actions fijadas por SHA, cero dependencias externas | implementado |
 | Mutation testing | matar mutantes del motor | pendiente antes de v1 estable |
 | Deuda técnica | registrada en este documento | activa |
 | Evidencia de ejecución | CI verde sobre HEAD exacto + Preview Vercel | exigida por PR |
@@ -66,21 +67,35 @@ La vista anual debe representar también los 1–2 Días del Año. Ocultarlos pr
 
 `aria-current="date"` pertenece al día actual, no al contenedor del mes. Las abreviaturas de días de semana deben ser inequívocas (`L M X J V S D`) y conservar nombres accesibles completos.
 
+### R-05 — CSP y progreso visual
+
+El progreso del ciclo usa un elemento `<progress>` con `value` y `max`. No se permite reintroducir mutaciones `element.style.*` para esta función mientras `style-src` permanezca sin `unsafe-inline`.
+
+### R-06 — Toolchain de CI
+
+Las Actions de terceros se fijan por SHA exacto. El runner se fija a `ubuntu-24.04` y las pruebas se ejecutan con Node 22. Una advertencia de runtime obsoleto en Actions invalida la reproducibilidad del gate hasta corregirla.
+
+## Cobertura bloqueante
+
+El comando de pruebas limita la medición a `src/calendar.js` y exige:
+
+- líneas: **≥95%**;
+- ramas: **≥90%**;
+- funciones: **100%**.
+
+La auditoría de agosto de 2026 alcanzó 99.04% de líneas, 93.75% de ramas y 100% de funciones. Las dos líneas no cubiertas corresponden a una defensa de rango que es inalcanzable mientras `startYear` se derive de la propia fecha gregoriana válida; no se fabrican estados imposibles solo para alcanzar 100% nominal.
+
 ## Deuda técnica explícita
 
 ### D-01 — Browser tests
 
-La lógica de dominio está cubierta por tests de Node, pero falta comprobar DOM, navegación y formulario en Chromium/WebKit/Firefox.
+La lógica de dominio y los contratos estáticos están cubiertos, pero falta ejecutar DOM, navegación, formulario y accesibilidad en Chromium/WebKit/Firefox reales.
 
-### D-02 — Umbral de cobertura
-
-El workflow produce cobertura, pero todavía no falla por debajo de un porcentaje acordado. Debe fijarse un umbral antes de declarar el motor v1 estable.
-
-### D-03 — Mutation testing
+### D-02 — Mutation testing
 
 Antes de v1 estable se exigirá mutation score explícito sobre `src/calendar.js`.
 
-### D-04 — Validación histórica
+### D-03 — Validación histórica
 
 La web diferencia deliberadamente hechos históricos de decisiones de reconstrucción. Las afirmaciones históricas extensas deberán incorporar fuentes verificables.
 
@@ -88,9 +103,10 @@ La web diferencia deliberadamente hechos históricos de decisiones de reconstruc
 
 No fusionar a `main` si:
 
-- falla cualquier prueba unitaria;
+- falla cualquier prueba unitaria o umbral de cobertura;
 - HEAD exacto no tiene CI verde;
 - Vercel Preview no corresponde al HEAD auditado;
 - la conversión de fronteras de mes/año no está verificada;
 - existe una regresión crítica de accesibilidad o layout;
-- se introduce una dependencia sin justificarla y fijarla reproduciblemente.
+- se introduce una dependencia sin justificarla y fijarla reproduciblemente;
+- se degrada la CSP para resolver una comodidad de UI evitable.
