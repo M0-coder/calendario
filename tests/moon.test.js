@@ -42,6 +42,12 @@ test("15 agosto 2026 es creciente, con iluminación baja y próxima a cuarto cre
   assert.ok(next.daysApprox > 3 && next.daysApprox < 6);
 });
 
+test("después de luna llena la tendencia es menguante", () => {
+  const state = moonStateForGregorian({ year: 2026, month: 9, day: 1 });
+  assert.equal(state.trend, "menguante");
+  assert.ok(state.phase > 0.5);
+});
+
 test("la vista diaria marca una sola fecha para cada fase principal cercana", () => {
   assert.equal(primaryMoonPhaseForGregorianDay({ year: 2026, month: 8, day: 12 }).phaseIndex, 0);
   assert.equal(primaryMoonPhaseForGregorianDay({ year: 2026, month: 8, day: 20 }).phaseIndex, 2);
@@ -54,8 +60,12 @@ test("la capa lunar no inventa precisión fuera del rango validado", () => {
   const state = moonStateForGregorian({ year: 1699, month: 12, day: 31 });
   assert.equal(state.supported, false);
   assert.match(state.message, /1700.*2100/);
+  assert.equal(approximateNextPrimaryPhase(utc("1699-12-31T12:00:00")), null);
+  assert.equal(primaryMoonPhaseForGregorianDay({ year: 1700, month: 1, day: 1 }), null);
 });
 
-test("rechaza Date inválido", () => {
+test("rechaza Date y componentes gregorianos inválidos", () => {
   assert.throws(() => moonStateAt(new Date(Number.NaN)), RangeError);
+  assert.throws(() => moonStateForGregorian({ year: 2026, month: 2, day: 30 }), RangeError);
+  assert.throws(() => moonStateForGregorian({ year: 2026.5, month: 8, day: 15 }), RangeError);
 });
