@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "check": "node --check src/calendar.js && node --check src/app.js && node --check tests/calendar.test.js && node --check tests/calendar-coverage.test.js && node --check tests/ui-contract.test.js",
-    "test": "node --test --experimental-test-coverage",
+    "test": "node --test --experimental-test-coverage --test-coverage-include=src/calendar.js --test-coverage-lines=95 --test-coverage-branches=90 --test-coverage-functions=100",
     "ci": "npm run check && npm test"
   },
   "engines": {
