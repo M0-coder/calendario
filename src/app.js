@@ -1,14 +1,28 @@
 import {
   MONTHS,
   formatGregorian,
+  formatGregorianShort,
   getLocalTodayParts,
   gregorianToReconstructed,
   monthGregorianRange,
-  parseISODate
+  parseISODate,
+  reconstructedWeekInfo,
+  reconstructedYearDayCount,
+  reconstructedYearDayToGregorian
 } from "./calendar.js";
 
-const dayNames = ["L", "M", "M", "J", "V", "S", "D"];
+const weekdayNames = [
+  { short: "L", full: "Lunes" },
+  { short: "M", full: "Martes" },
+  { short: "X", full: "Miércoles" },
+  { short: "J", full: "Jueves" },
+  { short: "V", full: "Viernes" },
+  { short: "S", full: "Sábado" },
+  { short: "D", full: "Domingo" }
+];
+
 const calendarGrid = document.querySelector("#calendar-grid");
+const yearDaysContainer = document.querySelector("#year-days");
 const converterForm = document.querySelector("#converter-form");
 const gregorianInput = document.querySelector("#gregorian-input");
 const conversionPrimary = document.querySelector("#conversion-primary");
@@ -25,12 +39,9 @@ function toISO({ year, month, day }) {
   return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
-function formatShort(parts) {
-  return new Intl.DateTimeFormat("es-PE", {
-    timeZone: "UTC",
-    day: "numeric",
-    month: "short"
-  }).format(new Date(Date.UTC(parts.year, parts.month - 1, parts.day)));
+function formatRange(range) {
+  const includeYear = range.first.year !== range.last.year;
+  return `${formatGregorianShort(range.first, includeYear)} — ${formatGregorianShort(range.last, includeYear)}`;
 }
 
 function formatPosition(reconstructed) {
@@ -41,10 +52,9 @@ function formatPosition(reconstructed) {
 }
 
 function formatWeek(reconstructed) {
-  if (reconstructed.kind === "year-day") return "Fuera de las semanas";
-  const week = Math.ceil(reconstructed.day / 7);
-  const weekday = ((reconstructed.day - 1) % 7) + 1;
-  return `Semana ${week} · día ${weekday}/7`;
+  if (reconstructed.kind === "year-day") return "Fuera de las 52 semanas";
+  const { weekOfYear, weekday } = reconstructedWeekInfo(reconstructed);
+  return `Semana ${weekOfYear}/52 · día ${weekday}/7`;
 }
 
 function renderToday() {
@@ -80,12 +90,14 @@ function createMonthCard(month, auc, activeDate) {
     activeDate.month === month.number;
 
   card.className = `month-card${isCurrent ? " is-current" : ""}`;
-  if (isCurrent) card.setAttribute("aria-current", "date");
+  card.setAttribute("aria-label", `${month.latin}, mes ${month.number} de 13, ${auc} AUC`);
 
   const days = Array.from({ length: 28 }, (_, index) => index + 1)
     .map((day) => {
       const active = isCurrent && activeDate.day === day;
-      return `<span class="calendar-day${active ? " is-today" : ""}">${day}</span>`;
+      const weekday = weekdayNames[(day - 1) % 7];
+      const currentAttribute = active ? ' aria-current="date"' : "";
+      return `<span class="calendar-day${active ? " is-today" : ""}" aria-label="${day} ${month.latin}, ${weekday.full}"${currentAttribute}>${day}</span>`;
     })
     .join("");
 
@@ -97,9 +109,9 @@ function createMonthCard(month, auc, activeDate) {
         <p>${month.meaning}</p>
       </div>
     </div>
-    <div class="month-range">${formatShort(range.first)} — ${formatShort(range.last)}</div>
-    <div class="weekday-row" aria-hidden="true">
-      ${dayNames.map((name) => `<span>${name}</span>`).join("")}
+    <div class="month-range">${formatRange(range)}</div>
+    <div class="weekday-row" aria-label="Semana reconstruida de lunes a domingo">
+      ${weekdayNames.map(({ short, full }) => `<span aria-label="${full}" title="${full}">${short}</span>`).join("")}
     </div>
     <div class="days-grid">${days}</div>
   `;
@@ -134,22 +146,58 @@ function renderMonths(auc) {
   }
 }
 
+function renderYearDays(auc) {
+  yearDaysContainer.replaceChildren();
+  const count = reconstructedYearDayCount(auc);
+
+  const intro = document.createElement("div");
+  intro.className = "year-days-intro";
+  intro.innerHTML = `
+    <span class="kicker">FUERA DE LOS MESES · FUERA DE LA SEMANA</span>
+    <strong>${count === 1 ? "1 Día del Año" : "2 Días del Año"}</strong>
+    <p>Estos días completan el ciclo solar sin desplazar el lunes de 1 Martius ni las 52 semanas regulares.</p>
+  `;
+  yearDaysContainer.append(intro);
+
+  const days = document.createElement("div");
+  days.className = "year-days-list";
+
+  for (let yearDay = 1; yearDay <= count; yearDay += 1) {
+    const gregorian = reconstructedYearDayToGregorian({ auc, yearDay });
+    const active = current.kind === "year-day" && current.auc === auc && current.yearDay === yearDay;
+    const item = document.createElement("div");
+    item.className = `year-day-item${active ? " is-today" : ""}`;
+    if (active) item.setAttribute("aria-current", "date");
+    item.innerHTML = `
+      <span>DÍA DEL AÑO ${yearDay}</span>
+      <strong>${formatGregorian(gregorian)}</strong>
+      <small>sin día de semana</small>
+    `;
+    days.append(item);
+  }
+
+  yearDaysContainer.append(days);
+}
+
 function renderYear() {
   viewYearLabel.textContent = `${viewAuc} AUC`;
+  prevYearButton.disabled = viewAuc <= 1;
   renderMonths(viewAuc);
+  renderYearDays(viewAuc);
 }
 
 function renderConversion(parts) {
   const reconstructed = gregorianToReconstructed(parts);
 
   if (reconstructed.kind === "month-day") {
+    const { weekOfYear, weekday } = reconstructedWeekInfo(reconstructed);
     conversionPrimary.textContent = `${reconstructed.day} ${reconstructed.monthName} · ${reconstructed.auc} AUC`;
     conversionSecondary.textContent =
-      `Mes ${reconstructed.month}/13 · semana ${Math.ceil(reconstructed.day / 7)} · día ${reconstructed.dayOfCycle}/${reconstructed.cycleLength}`;
+      `Mes ${reconstructed.month}/13 · semana ${weekOfYear}/52 · día ${weekday}/7 · ciclo ${reconstructed.dayOfCycle}/${reconstructed.cycleLength}`;
   } else {
     conversionPrimary.textContent = `Día del Año ${reconstructed.yearDay} · ${reconstructed.auc} AUC`;
     conversionSecondary.textContent =
-      `Fuera de los 13 meses · día ${reconstructed.dayOfCycle}/${reconstructed.cycleLength}`;
+      `Fuera de los 13 meses y de las 52 semanas · ciclo ${reconstructed.dayOfCycle}/${reconstructed.cycleLength}`;
   }
 }
 
@@ -163,6 +211,7 @@ function boot() {
 }
 
 prevYearButton.addEventListener("click", () => {
+  if (viewAuc <= 1) return;
   viewAuc -= 1;
   renderYear();
 });
