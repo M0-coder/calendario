@@ -31,6 +31,18 @@ function formatNext(next) {
     : "—";
 }
 
+function ensureHeroSide() {
+  let side = document.querySelector(".hero-side");
+  if (side) return side;
+  const ledger = document.querySelector(".hero-ledger");
+  if (!ledger) throw new Error("No se encontró .hero-ledger");
+  side = document.createElement("div");
+  side.className = "hero-side";
+  ledger.before(side);
+  side.append(ledger);
+  return side;
+}
+
 function ensureMoonCard() {
   let card = document.querySelector("#moon-card");
   if (card) return card;
@@ -50,7 +62,7 @@ function ensureMoonCard() {
       <div><span>Próxima principal</span><strong id="moon-next">—</strong></div>
     </div>
     <p class="moon-note">Capa astronómica independiente del ciclo XIII × XXVIII. Rango validado ${LUNAR_SUPPORTED_YEARS.min}–${LUNAR_SUPPORTED_YEARS.max}.</p>`;
-  document.querySelector(".hero-ledger")?.after(card);
+  ensureHeroSide().append(card);
   return card;
 }
 
@@ -60,7 +72,9 @@ function renderMoonToday() {
   const state = moonStateAt(now);
   if (!state.supported) {
     document.querySelector("#moon-card-title").textContent = "Fuera del rango validado";
-    for (const id of ["moon-illumination", "moon-trend", "moon-age", "moon-next"]) document.querySelector(`#${id}`).textContent = "—";
+    for (const id of ["moon-illumination", "moon-trend", "moon-age", "moon-next"]) {
+      document.querySelector(`#${id}`).textContent = "—";
+    }
     return;
   }
   document.querySelector("#moon-symbol").textContent = state.symbol;
